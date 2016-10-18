@@ -1,0 +1,22 @@
+# This program is based on research paper [SA-SSR](www.ncbi.nlm.nih.gov/pubmed/27170037)
+
+# Right now it is finding only Exact tandem repeats of any length
+
+#Test data
+Dna Sequence: 
+>gi|568815580|ref|NC_000018.10| Homo sapiens chromosome 18, GRCh38.p7 Primary Assembly
+
+
+# Src files TandemRepeatFinder.java TandemRepeatFinderSeq.java
+Compile:
+javac TandemRepeatFinder.java
+javac TandemRepeatFinderSeq.java
+
+Run:
+javac TandemRepeatFinder
+javac TandemRepeatFinderSeq
+
+# Compare Output and running time
+
+$ time java TandemRepeatFinder > output_par.txt
+$ time java TandemRepeatFinderSeq > output_seq.txt

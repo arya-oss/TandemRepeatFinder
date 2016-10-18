@@ -3,15 +3,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  *
  * @author Rajmani Arya
  * Date: 8th Oct 2016
  */
-public class TandemRepeatFinder {
+public class TandemRepeatFinderSeq {
     
     public static int[] suffixArray(CharSequence S) {
         int n = S.length();
@@ -72,7 +70,7 @@ public class TandemRepeatFinder {
             K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
             R[i] = LCP[i-1]/K[i];
         }
-//        System.out.println("Index   Period   Length   UnitLength");
+       System.out.println("Index   Period   Length   UnitLength");
         for (int i=1; i<dna_len; i++) {
             if (R[i] > 0) {
                 pos = Math.min(SufArr[i], SufArr[i-1]);
@@ -83,41 +81,19 @@ public class TandemRepeatFinder {
         }
     }
     
-    private static class WorkerThread implements Runnable {
-        private String dna;
-        private int startIndex;
-        public WorkerThread(int index, String dna) {
-            this.startIndex = index;
-            this.dna = dna;
-        }
-        @Override
-        public void run() {
-            Repeat(startIndex, dna);
-        }
-    }
-    
     public static void main(String[] args) throws FileNotFoundException, IOException {
         if (args.length == 1) {
-        	System.out.println("Usage: java TandemRepeatFinder <fasta_file>\n\t fasta file with {A,C,G,T} only");
-        	System.exit(1);
+            System.out.println("Usage: java TandemRepeatFinder <fasta_file>\n\t fasta file with {A,C,G,T} only");
+            System.exit(1);
         }
         File file = new File(args[1]);
-        ExecutorService thpool = Executors.newFixedThreadPool(8);
         int size = (int)file.length();
         int chunk_size = (int)Math.ceil((double)size/16000.0);
-        byte bytes[] = new byte[16000];
+        byte bytes[] = new byte[size];
         
         FileInputStream fis = new FileInputStream(file);
-        
-        for (int i=0; i<chunk_size; i++) {
-            fis.read(bytes);
-            Runnable worker = new WorkerThread(i*2000, new String(bytes));
-            thpool.execute(worker);
-        }
-        
-        thpool.shutdown();  
-        while (!thpool.isTerminated()) {
-        }
-        System.out.println("Finished all threads");  
+        fis.read(bytes);
+        String dna_seq = new String(bytes);
+        Repeat(0, dna_seq); 
     }
 }

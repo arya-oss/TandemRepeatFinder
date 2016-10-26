@@ -1,3 +1,7 @@
 *.class
 *.txt
 
+Data/
+Results/
+Plots/
+*.csv

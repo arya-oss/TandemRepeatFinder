@@ -1,7 +1,5 @@
 import sys
 
-
-
 '''
 Author: Rajmani Arya
 Date: 18th Oct 2016

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+python removeNewline.py ../Data/human_genome/homo_sapiens_1.fasta data_t.fasta
+java TandemRepeatFinder data_t.fasta > freq.csv
+
+python plot.py
+
+mv per_freq.png per_freq_1.png
+mv per_len.png per_len_1.png

@@ -6,13 +6,18 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import java.util.Map.Entry;
+import java.util.HashMap;
+
 /**
  *
  * @author Rajmani Arya
  * Date: 8th Oct 2016
  */
 public class TandemRepeatFinder {
-    
+    public static HashMap<Integer, Integer> map;
+    public static HashMap<Integer, Double> dmap;
+
     public static int[] suffixArray(CharSequence S) {
         int n = S.length();
         Integer[] order = new Integer[n];
@@ -62,7 +67,67 @@ public class TandemRepeatFinder {
         return lcp;
     }
     
-    public static void Repeat(int startIndex, String dna) throws OutOfMemoryError {
+    public static void PrintUnitSequence(int startIndex, String dna) throws OutOfMemoryError {
+        int pos, len, dna_len = dna.length();
+        int SufArr[] = suffixArray(dna);
+        int LCP[] = lcp(SufArr, dna);
+        int K[] = new int[dna_len];
+        int R[] = new int[dna_len];
+        for (int i=1; i < dna_len; i++) {
+            K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
+            R[i] = LCP[i-1]/K[i];
+        } 
+        // System.out.println("Index,Period,Length,UnitLength,Unit");
+        for (int i=1; i < dna_len; i++) {
+            if (R[i] > 0) {
+                pos = Math.min(SufArr[i], SufArr[i-1]);
+                len = K[i]*(R[i]+1);
+                System.out.println(startIndex+pos + "," + (R[i]+1) + "," + len + "," + K[i] + ","+ dna.substring(pos, pos+K[i]));
+            }
+        }
+    }
+
+    public static void PrintUnit(int startIndex, String dna) throws OutOfMemoryError {
+        int pos, len, dna_len = dna.length();
+        int SufArr[] = suffixArray(dna);
+        int LCP[] = lcp(SufArr, dna);
+        int K[] = new int[dna_len];
+        int R[] = new int[dna_len];
+        for (int i=1; i < dna_len; i++) {
+            K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
+            R[i] = LCP[i-1]/K[i];
+        } 
+        // System.out.println("Index,Period,Length,UnitLength");
+        for (int i=1; i < dna_len; i++) {
+            if (R[i] > 0) {
+                pos = Math.min(SufArr[i], SufArr[i-1]);
+                len = K[i]*(R[i]+1);
+                System.out.println(startIndex+pos + "," + (R[i]+1) + "," + len + "," + K[i]);
+            }
+        }
+    }
+
+    public static void PrintSequence(int startIndex, String dna) throws OutOfMemoryError {
+        int pos, len, dna_len = dna.length();
+        int SufArr[] = suffixArray(dna);
+        int LCP[] = lcp(SufArr, dna);
+        int K[] = new int[dna_len];
+        int R[] = new int[dna_len];
+        for (int i=1; i < dna_len; i++) {
+            K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
+            R[i] = LCP[i-1]/K[i];
+        } 
+        // System.out.println("Index,Period,Length,Sequence");
+        for (int i=1; i < dna_len; i++) {
+            if (R[i] > 0) {
+                pos = Math.min(SufArr[i], SufArr[i-1]);
+                len = K[i]*(R[i]+1);
+                System.out.println(startIndex+pos + ","+ (R[i]+1) + "," + len + "," + dna.substring(pos, pos+len));
+            }
+        }
+    }
+    
+    public static void PrintFrequency(int startIndex, String dna) {
         int pos, len, dna_len = dna.length();
         int SufArr[] = suffixArray(dna);
         int LCP[] = lcp(SufArr, dna);
@@ -72,17 +137,32 @@ public class TandemRepeatFinder {
             K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
             R[i] = LCP[i-1]/K[i];
         }
-//        System.out.println("Index   Period   Length   UnitLength");
-        for (int i=1; i<dna_len; i++) {
+        for (int i=1; i < dna_len; i++) {
             if (R[i] > 0) {
                 pos = Math.min(SufArr[i], SufArr[i-1]);
                 len = K[i]*(R[i]+1);
-//                System.out.println("Repeat at " + pos + " "+ (R[i]+1) + " " + dna.substring(pos, pos+len));
-                System.out.println(startIndex+pos + "\t" + (R[i]+1) + "\t" + len + "\t" + K[i]);
+                // synchronized (map) {
+                    if(map.containsKey(K[i])) {
+                        int x = map.get(K[i]);
+                        map.put(K[i], x+1);
+                        // synchronized(dmap) {
+                            dmap.put(K[i], (dmap.get(K[i])*x+len)/x);
+                        // }
+                    } else {
+                        map.put(K[i], 1);
+                        // synchronized(dmap) {
+                            dmap.put(K[i], (double)len);
+                        // }
+                    }
+                // }
             }
         }
+
+        // for (Entry<Integer, Integer> entry : map.entrySet()) {
+        //     System.out.println(entry.getKey()+","+entry.getValue()+","+ dmap.get(entry.getKey()));
+        // }                    
     }
-    
+
     private static class WorkerThread implements Runnable {
         private String dna;
         private int startIndex;
@@ -92,16 +172,19 @@ public class TandemRepeatFinder {
         }
         @Override
         public void run() {
-            Repeat(startIndex, dna);
+            // PrintFrequency(startIndex, dna);
+            PrintUnit(startIndex, dna);
         }
     }
     
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        if (args.length == 1) {
+        if (args.length != 1) {
         	System.out.println("Usage: java TandemRepeatFinder <fasta_file>\n\t fasta file with {A,C,G,T} only");
         	System.exit(1);
         }
-        File file = new File(args[1]);
+        File file = new File(args[0]);
+        map = new HashMap<>();
+        dmap = new HashMap<>();
         ExecutorService thpool = Executors.newFixedThreadPool(8);
         int size = (int)file.length();
         int chunk_size = (int)Math.ceil((double)size/16000.0);
@@ -111,13 +194,15 @@ public class TandemRepeatFinder {
         
         for (int i=0; i<chunk_size; i++) {
             fis.read(bytes);
-            Runnable worker = new WorkerThread(i*2000, new String(bytes));
+            Runnable worker = new WorkerThread(i*16000, new String(bytes));
             thpool.execute(worker);
         }
         
         thpool.shutdown();  
         while (!thpool.isTerminated()) {
         }
-        System.out.println("Finished all threads");  
+        for (Entry<Integer, Integer> entry : map.entrySet()) {
+            System.out.println(entry.getKey()+","+entry.getValue()+","+ dmap.get(entry.getKey()));
+        }
     }
 }

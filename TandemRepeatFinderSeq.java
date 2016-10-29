@@ -159,17 +159,30 @@ public class TandemRepeatFinderSeq {
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        if (args.length != 1) {
-            System.out.println("Usage: java TandemRepeatFinder <fasta_file>\n\t fasta file with {A,C,G,T} only");
+        if (args.length != 2) {
+            System.out.println("Usage: java TandemRepeatFinder <fasta_file> <output_type>" + 
+            "\n1.PrintUnit, 2.PrintSequence, 3.PrintFrequency, 4.PrintUnitSequence\n\t fasta file with {A,C,G,T} only");
             System.exit(1);
         }
         File file = new File(args[0]);
+        int option = Integer.parseInt(args[1]);
+
         int size = (int)file.length();
         byte bytes[] = new byte[size];
 
         FileInputStream fis = new FileInputStream(file);
         fis.read(bytes);
         String dna_seq = new String(bytes);
-        PrintFrequency(0, dna_seq);
+        if (option == 1) {
+            PrintUnit(0, dna_seq);
+        } else if (option == 2) {
+            PrintSequence(0, dna_seq);
+        } else if ( option == 3) {
+            PrintFrequency(0, dna_seq);
+        } else if (option == 4) {
+            PrintUnitSequence(0, dna_seq);
+        } else {
+            System.out.println("Invalid option");
+        }
     }
 }

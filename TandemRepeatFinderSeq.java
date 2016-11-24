@@ -105,6 +105,26 @@ public class TandemRepeatFinderSeq {
         }
     }
 
+    public static void PrintRange(int startIndex, String dna) throws OutOfMemoryError {
+        int pos, len, dna_len = dna.length();
+        int SufArr[] = suffixArray(dna);
+        int LCP[] = lcp(SufArr, dna);
+        int K[] = new int[dna_len];
+        int R[] = new int[dna_len];
+        for (int i=1; i < dna_len; i++) {
+            K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
+            R[i] = LCP[i-1]/K[i];
+        } 
+        System.out.println("S-Index,E-Index,Period,Sequence");
+        for (int i=1; i < dna_len; i++) {
+            if (R[i] > 0) {
+                pos = Math.min(SufArr[i], SufArr[i-1]);
+                len = K[i]*(R[i]+1);
+                System.out.println(startIndex+pos+ "," +(startIndex+pos+len)+ "," + (R[i]+1) + "," +dna.substring(pos, pos+K[i]));
+            }
+        }
+    }
+
     public static void PrintSequence(int startIndex, String dna) throws OutOfMemoryError {
         int pos, len, dna_len = dna.length();
         int SufArr[] = suffixArray(dna);
@@ -161,7 +181,7 @@ public class TandemRepeatFinderSeq {
     public static void main(String[] args) throws FileNotFoundException, IOException {
         if (args.length != 2) {
             System.out.println("Usage: java TandemRepeatFinder <fasta_file> <output_type>" + 
-            "\n1.PrintUnit, 2.PrintSequence, 3.PrintFrequency, 4.PrintUnitSequence\n\t fasta file with {A,C,G,T} only");
+            "\n1.PrintUnit, 2.PrintSequence, 3.PrintFrequency, 4.PrintUnitSequence, 5.PrintRange\n\t fasta file with {A,C,G,T} only");
             System.exit(1);
         }
         File file = new File(args[0]);
@@ -181,6 +201,8 @@ public class TandemRepeatFinderSeq {
             PrintFrequency(0, dna_seq);
         } else if (option == 4) {
             PrintUnitSequence(0, dna_seq);
+        } else if (option == 5) {
+            PrintRange(0, dna_seq);
         } else {
             System.out.println("Invalid option");
         }

@@ -15,9 +15,6 @@ import java.util.HashMap;
  * Date: 8th Oct 2016
  */
 public class TandemRepeatFinder {
-    public static HashMap<Integer, Integer> map;
-    public static HashMap<Integer, Double> dmap;
-
     public static int[] suffixArray(CharSequence S) {
         int n = S.length();
         Integer[] order = new Integer[n];
@@ -127,7 +124,7 @@ public class TandemRepeatFinder {
         }
     }
     
-    public static void PrintFrequency(int startIndex, String dna) {
+    public static void PrintRange(int startIndex, String dna) throws OutOfMemoryError {
         int pos, len, dna_len = dna.length();
         int SufArr[] = suffixArray(dna);
         int LCP[] = lcp(SufArr, dna);
@@ -136,31 +133,15 @@ public class TandemRepeatFinder {
         for (int i=1; i < dna_len; i++) {
             K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
             R[i] = LCP[i-1]/K[i];
-        }
+        } 
+        //System.out.println("S-Index,E-Index,Period,Sequence");
         for (int i=1; i < dna_len; i++) {
-            if (R[i] > 0) {
+            if (R[i] > 0 && K[i] <= 10) {
                 pos = Math.min(SufArr[i], SufArr[i-1]);
                 len = K[i]*(R[i]+1);
-                // synchronized (map) {
-                    if(map.containsKey(K[i])) {
-                        int x = map.get(K[i]);
-                        map.put(K[i], x+1);
-                        // synchronized(dmap) {
-                            dmap.put(K[i], (dmap.get(K[i])*x+len)/x);
-                        // }
-                    } else {
-                        map.put(K[i], 1);
-                        // synchronized(dmap) {
-                            dmap.put(K[i], (double)len);
-                        // }
-                    }
-                // }
+                System.out.println(startIndex+pos+ "," +(startIndex+pos+len)+ "," + (R[i]+1) + "," +dna.substring(pos, pos+K[i]));
             }
         }
-
-        // for (Entry<Integer, Integer> entry : map.entrySet()) {
-        //     System.out.println(entry.getKey()+","+entry.getValue()+","+ dmap.get(entry.getKey()));
-        // }                    
     }
 
     private static class WorkerThread implements Runnable {
@@ -172,37 +153,35 @@ public class TandemRepeatFinder {
         }
         @Override
         public void run() {
-            // PrintFrequency(startIndex, dna);
-            PrintUnit(startIndex, dna);
+            PrintRange(startIndex, dna);
         }
     }
     
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        if (args.length != 1) {
-        	System.out.println("Usage: java TandemRepeatFinder <fasta_file>\n\t fasta file with {A,C,G,T} only");
+        if (args.length == 0) {
+        	System.out.println("Usage: java TandemRepeatFinder <fasta_file> [NUM_THREADS]\n\t fasta file with {A,C,G,T} only");
         	System.exit(1);
         }
+        int num_threads = 8;
+        if (args.length == 2) {
+            num_threads = Integer.parseInt(args[1]);
+        }
         File file = new File(args[0]);
-        map = new HashMap<>();
-        dmap = new HashMap<>();
         ExecutorService thpool = Executors.newFixedThreadPool(8);
         int size = (int)file.length();
-        int chunk_size = (int)Math.ceil((double)size/16000.0);
-        byte bytes[] = new byte[16000];
+        int chunk_size = (int)Math.ceil((double)size/10000.0);
+        byte bytes[] = new byte[10000];
         
         FileInputStream fis = new FileInputStream(file);
         
         for (int i=0; i<chunk_size; i++) {
             fis.read(bytes);
-            Runnable worker = new WorkerThread(i*16000, new String(bytes));
+            Runnable worker = new WorkerThread(i*10000, new String(bytes));
             thpool.execute(worker);
         }
         
         thpool.shutdown();  
         while (!thpool.isTerminated()) {
-        }
-        for (Entry<Integer, Integer> entry : map.entrySet()) {
-            System.out.println(entry.getKey()+","+entry.getValue()+","+ dmap.get(entry.getKey()));
         }
     }
 }

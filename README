@@ -20,3 +20,8 @@ javac TandemRepeatFinderSeq
 
 $ time java TandemRepeatFinder > output_par.txt
 $ time java TandemRepeatFinderSeq > output_seq.txt
+
+System.out.println("Usage: java TandemRepeatFinderSeq <fasta_file> <output_type>" + 
+            "\n1.PrintUnit, 2.PrintSequence, 3.PrintFrequency, 4.PrintUnitSequence, 5.PrintRange\n\t f
+
+time java TandemRepeatFinderSeq data.fasta <options>

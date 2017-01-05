@@ -6,7 +6,10 @@ import java.util.Arrays;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
-
+import java.util.TreeMap;
+import java.util.Set;
+import java.util.Map;
+import java.util.Iterator;
 /**
  *
  * @author Rajmani Arya
@@ -15,6 +18,8 @@ import java.util.Map.Entry;
 public class TandemRepeatFinderSeq {
     public static HashMap<Integer, Integer> map;
     public static HashMap<Integer, Double> dmap;
+    //public static HashMap<Integer, Integer> pos_i;
+    public static TreeMap<Integer, Integer> pos_i;
 
     public static int[] suffixArray(CharSequence S) {
         int n = S.length();
@@ -134,7 +139,7 @@ public class TandemRepeatFinderSeq {
         for (int i=1; i < dna_len; i++) {
             K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
             R[i] = LCP[i-1]/K[i];
-        } 
+        }
         System.out.println("Index,Period,Length,Sequence");
         for (int i=1; i < dna_len; i++) {
             if (R[i] > 0) {
@@ -144,7 +149,51 @@ public class TandemRepeatFinderSeq {
             }
         }
     }
-    
+
+    public static void PrintSequenceOnlyMax(int startIndex, String dna) throws OutOfMemoryError {
+        int pos, len, dna_len = dna.length();
+        int SufArr[] = suffixArray(dna);
+        int LCP[] = lcp(SufArr, dna);
+        int K[] = new int[dna_len];
+        int R[] = new int[dna_len];
+        int done[] = new int[dna_len+1];
+        done[0] = 0;
+        for (int i=1; i < dna_len; i++) {
+            K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
+            R[i] = LCP[i-1]/K[i];
+            done[i] = 0;
+        }
+        done[dna_len] = 0 ;
+        System.out.println("Index,\t Period, \t Total_Length, \t Pattern_size \t Sequence");
+        int prev = 0;
+        // sort the pos (increasing order to get the higheset len tandem repeats only)
+        // map pos and i then sort wrt to pos
+        pos_i = new TreeMap<>();
+        for (int i=1; i < dna_len; i++) {
+            if (R[i] > 0) {
+                pos = Math.min(SufArr[i], SufArr[i-1]);
+                len = K[i]*(R[i]+1);
+                int pattern_size = len/(R[i]+1);
+                //System.out.println(startIndex+pos + ","+ (R[i]+1) + "," + len + "," + pattern_size +"," + dna.substring(pos, pos+len));
+                pos_i.put(pos, i);
+            }
+        }
+        //sorted pos_i wrt pos since it is a treemap
+        Set set = pos_i.entrySet();
+        Iterator iterator = set.iterator();
+        while(iterator.hasNext()) {
+             Map.Entry mentry = (Map.Entry)iterator.next();
+             pos = (int)mentry.getKey();
+             int i = (int)mentry.getValue();
+             len = K[i]*(R[i]+1);
+             int pattern_size = len/(R[i]+1);
+             done[startIndex+pos] = 1;
+             if(done[startIndex + pos - pattern_size] == 0){
+                System.out.println(startIndex+pos + ","+ (R[i]+1) + "," + len + "," + pattern_size +"," + dna.substring(pos, pos+len));
+            }
+        }
+    }
+
     public static void PrintFrequency(int startIndex, String dna) {
         map = new HashMap<>();
         dmap = new HashMap<>();
@@ -180,7 +229,7 @@ public class TandemRepeatFinderSeq {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         if (args.length != 2) {
-            System.out.println("Usage: java TandemRepeatFinder <fasta_file> <output_type>" + 
+            System.out.println("Usage: java TandemRepeatFinderSeq <fasta_file> <output_type>" + 
             "\n1.PrintUnit, 2.PrintSequence, 3.PrintFrequency, 4.PrintUnitSequence, 5.PrintRange\n\t fasta file with {A,C,G,T} only");
             System.exit(1);
         }
@@ -203,7 +252,10 @@ public class TandemRepeatFinderSeq {
             PrintUnitSequence(0, dna_seq);
         } else if (option == 5) {
             PrintRange(0, dna_seq);
-        } else {
+        }
+        else if (option == 6) {
+            PrintSequenceOnlyMax(0, dna_seq);
+        }  else {
             System.out.println("Invalid option");
         }
     }

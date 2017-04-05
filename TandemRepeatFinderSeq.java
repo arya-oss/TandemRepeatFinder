@@ -50,7 +50,7 @@ public class TandemRepeatFinderSeq {
         }
         return sa;
     }
-    
+
     // longest common prefixes array in O(n)
     @SuppressWarnings("empty-statement")
     public static int[] lcp(int[] sa, CharSequence s) {
@@ -69,7 +69,7 @@ public class TandemRepeatFinderSeq {
         }
         return lcp;
     }
-    
+
     public static void PrintUnitSequence(int startIndex, String dna) throws OutOfMemoryError {
         int pos, len, dna_len = dna.length();
         int SufArr[] = suffixArray(dna);
@@ -79,7 +79,7 @@ public class TandemRepeatFinderSeq {
         for (int i=1; i < dna_len; i++) {
             K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
             R[i] = LCP[i-1]/K[i];
-        } 
+        }
         System.out.println("Index,Period,Length,UnitLength,Unit");
         for (int i=1; i < dna_len; i++) {
             if (R[i] > 0) {
@@ -99,7 +99,7 @@ public class TandemRepeatFinderSeq {
         for (int i=1; i < dna_len; i++) {
             K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
             R[i] = LCP[i-1]/K[i];
-        } 
+        }
         System.out.println("Index,Period,Length,UnitLength");
         for (int i=1; i < dna_len; i++) {
             if (R[i] > 0) {
@@ -119,7 +119,7 @@ public class TandemRepeatFinderSeq {
         for (int i=1; i < dna_len; i++) {
             K[i] = Math.abs(SufArr[i]-SufArr[i-1]);
             R[i] = LCP[i-1]/K[i];
-        } 
+        }
         System.out.println("S-Index,E-Index,Period,Sequence");
         for (int i=1; i < dna_len; i++) {
             if (R[i] > 0) {
@@ -224,13 +224,13 @@ public class TandemRepeatFinderSeq {
         System.out.println("Period,Frequency,AverageLength");
         for (Entry<Integer, Integer> entry : map.entrySet()) {
             System.out.println(entry.getKey()+","+entry.getValue()+","+ dmap.get(entry.getKey()));
-        }                    
+        }
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         if (args.length != 2) {
-            System.out.println("Usage: java TandemRepeatFinderSeq <fasta_file> <output_type>" + 
-            "\n1.PrintUnit, 2.PrintSequence, 3.PrintFrequency, 4.PrintUnitSequence, 5.PrintRange\n\t fasta file with {A,C,G,T} only");
+            System.out.println("Usage: java TandemRepeatFinderSeq <fasta_file> <output_type>" +
+            "\n1.PrintUnit, 2.PrintSequence, 3.PrintFrequency, 4.PrintUnitSequence, 5.PrintRange 6. PrintSequenceOnlyMax\n\t fasta file with {A,C,G,T} only");
             System.exit(1);
         }
         File file = new File(args[0]);

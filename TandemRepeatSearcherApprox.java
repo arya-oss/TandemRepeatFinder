@@ -56,7 +56,7 @@ public class TandemRepeatSearcherApprox {
 
 	static void findTandemRepeatOverCenter(final int start, final int end, final int side) {
 		final int h = getCenter(start, end);
-		for (int l=2; l <= h - start; l++) {
+		for (int l=TOLERATE + 1; l <= h - start; l++) {
 			final int q;
 			if (side == Side.LEFT) {
 				q = h - l;
@@ -77,9 +77,39 @@ public class TandemRepeatSearcherApprox {
 					startPos = h - lceBackward + 1;
 					endPos = q + lceForward;
 				}
-				repeats.add(new Repeat(startPos, lceBackward+lceForward+l, l));
+				// it must have tolerance with all consecutive copies of the
+				// repeat. Filter if it is not.
+				// motif lenght = l
+				List<String> parts = split_the_string(
+					String.copyValueOf(input).substring(startPos, endPos), l);
+				int check_all = check_hamming_dist(parts);
+				if (check_all == 1){
+					repeats.add(
+						new Repeat(startPos, endPos, lceBackward+lceForward+l, l));
+				}
 			}
 		}
+	}
+
+	public static List<String> split_the_string(String s, int size){
+		List<String> ret = new ArrayList<String>();
+		for (String retval: s.split("(?<=\\G.{" + size +"})")) {
+			ret.add(retval);
+		}
+
+		// // return Arrays.toString(s.split("(?<=\\G.{" + size +"})"));
+		return ret;
+	}
+
+	public static int check_hamming_dist(List<String> parts){
+		for(int i=0;i < parts.size(); i++){
+			for(int j = i+1; j< parts.size(); j++){
+				if(TOLERATE != getHammingDistance(parts.get(i), parts.get(j))){
+					return 0;
+				}
+			}
+		}
+		return 1;
 	}
 
 	public static int backwardLce(final int start, final int end, int i, int j) {
@@ -123,14 +153,33 @@ public class TandemRepeatSearcherApprox {
         return lce;
     }
 
+    public static int getHammingDistance(String sequence1, String sequence2) {
+	    char[] s1 = sequence1.toCharArray();
+	    char[] s2 = sequence2.toCharArray();
+
+	    int shorter = Math.min(s1.length, s2.length);
+	    int longest = Math.max(s1.length, s2.length);
+
+	    int result = 0;
+	    for (int i=0; i<shorter; i++) {
+	        if (s1[i] != s2[i]) result++;
+	    }
+
+	    result += longest - shorter;
+
+	    return result;
+	}
+
 	static class Repeat {
 		final int motif;
 		final int start;
 		final int length;
-		Repeat(int start, int length, int motif) {
+		final int end;
+		Repeat(int start, int end, int length, int motif) {
 			this.start = start;
 			this.length = length;
 			this.motif = motif;
+			this.end = end;
 		}
 
 		@Override
@@ -147,7 +196,7 @@ public class TandemRepeatSearcherApprox {
 
     	@Override
     	public String toString() {
-        	return "[start: " + start + ", length: " + length + ", motif:" + motif + "]";
+        	return "[start: " + start + ", end: " + end + ", total length: " + length + ", motif length:" + motif + "]";
     	}
 	}
 	static class Side {

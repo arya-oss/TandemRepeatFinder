@@ -3,7 +3,7 @@
 # Right now it is finding only Exact tandem repeats of any length
 
 #Test data
-Dna Sequence: 
+Dna Sequence:
 >gi|568815580|ref|NC_000018.10| Homo sapiens chromosome 18, GRCh38.p7 Primary Assembly
 
 
@@ -21,7 +21,7 @@ javac TandemRepeatFinderSeq
 $ time java TandemRepeatFinder > output_par.txt
 $ time java TandemRepeatFinderSeq > output_seq.txt
 
-System.out.println("Usage: java TandemRepeatFinderSeq <fasta_file> <output_type>" + 
-            "\n1.PrintUnit, 2.PrintSequence, 3.PrintFrequency, 4.PrintUnitSequence, 5.PrintRange\n\t f
+System.out.println("Usage: java TandemRepeatFinderSeq <fasta_file> <output_type>" +
+            "\n1.PrintUnit, 2.PrintSequence, 3.PrintFrequency, 4.PrintUnitSequence, 5.PrintRange 6. PrintSequenceOnlyMax\n\t f
 
 time java TandemRepeatFinderSeq data.fasta <options>

@@ -90,7 +90,7 @@ public class TandemRepeatSearcher {
         
         for (int i=0; i < chunks; i++) {
             fis.read(bytes);
-            Runnable worker = new WorkerThread(new String(bytes), i*chunk_size, minLength, maxLength, true);
+            Runnable worker = new WorkerThread(new String(bytes), i*chunk_size, minLength, maxLength, false);
             thpool.execute(worker);
         }
         

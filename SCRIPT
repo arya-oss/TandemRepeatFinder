@@ -1,16 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 
-if [ -z $1 ]; then
-    echo 'Usage: ./SCRIPT /path/to/dna_sequence'
-    exit 1
-fi
+python removeNewline.py $1 tmp1.fasta
 
-python removeNewline.py $1 data_t.fasta
-java TandemRepeatFinderSeq data_t.fasta > freq.csv
+sed 's/N//g' tmp1.fasta > tmp.fasta
 
-# python plot.py
-# mv per_freq.png $1.png
-# mv per_len.png $1.png
+time java TandemRepeatSearcher tmp.fasta | cut -d" " -f1 | awk '{s+=$1} END {print s}' 
+
+echo 'Searching for Approx. Repeats'
+
+time java TandemRepeatSearcherApprox tmp.fasta | cut -d" " -f1 | awk '{s+=$1} END {print s}' 
 
 echo $1
 echo 'Finished !!'

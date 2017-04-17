@@ -46,6 +46,10 @@ public class TandemRepeatSearcherApprox {
 		}
 	}
 
+	public int getRepeats() {
+		return repeats.size();
+	}
+
 	public void status() {
 		System.out.println(repeats.size() + " Repeats found from " + offset + " to " + (input.length + offset));
 	}
@@ -99,7 +103,7 @@ public class TandemRepeatSearcherApprox {
         
         for (int i=0; i < chunks; i++) {
             fis.read(bytes);
-            Runnable worker = new WorkerThread(new String(bytes), i*chunk_size, minLength, maxLength, tolerate, true);
+            Runnable worker = new WorkerThread(new String(bytes), i*chunk_size, minLength, maxLength, tolerate, false);
             thpool.execute(worker);
         }
         
